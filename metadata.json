@@ -1,0 +1,8 @@
+{
+  "name": "CloudParity - Multi-Cloud Cost & Performance Analytics",
+  "description": "Comprehensive comparative analytics, real-time cost monitoring, performance benchmarks, and pricing forecasts across AWS, Azure, and Google Cloud Platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

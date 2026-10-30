@@ -7,7 +7,6 @@ import {
   Building,
   User,
   MessageSquare,
-  Sparkles,
 } from 'lucide-react';
 import {
   WorkloadConfig,
@@ -34,10 +33,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   quarterly,
   benchmarks,
 }) => {
-  if (!isOpen) return null;
-
   const [companyName, setCompanyName] = useState<string>('Acme Global Enterprises');
-  const [preparedBy, setPreparedBy] = useState<string>('Cloud Infrastructure Architecture Team');
+  const [preparedBy, setPreparedBy] = useState<string>('Mani Ravindran — Cloud Architecture Lead');
   const [notes, setNotes] = useState<string>(
     'Evaluated based on production high-availability baseline with multi-AZ relational databases, premium storage IOPS, and 1-year reserved commitment terms.'
   );
@@ -47,6 +44,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [includeForecasting, setIncludeForecasting] = useState<boolean>(true);
 
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+
+  if (!isOpen) return null;
 
   const handleExportExcel = () => {
     const options: ExportReportOptions = {
@@ -79,21 +78,27 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const lowest = results.find((r) => r.isLowestCost);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+      <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-          <div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Export Customized Cloud Cost Report
-            </h3>
-            <p className="text-xs text-slate-400">
-              Generate boardroom-ready executive PDF and audit-ready Excel spreadsheets.
-            </p>
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-[#F3F5F1]">
+          <div className="flex items-center gap-3">
+            <span className="rm-mono-mark !w-8 !h-8 !text-xs" aria-hidden="true">
+              RM
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-[#0E2238]">
+                Export Maniq CloudParity Executive Report
+              </h3>
+              <p className="text-xs text-slate-600">
+                Generate boardroom-ready executive PDF and audit-ready Excel spreadsheets.
+              </p>
+            </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded text-slate-400 hover:text-white transition-colors"
+            className="p-1 rounded text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -102,8 +107,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 space-y-5 overflow-y-auto">
           {downloadSuccess && (
-            <div className="p-3 rounded-lg bg-emerald-950/70 border border-emerald-800/60 text-xs text-emerald-300 flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 font-medium flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>{downloadSuccess}</span>
             </div>
           )}
@@ -111,8 +116,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {/* Report Customization Fields */}
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-slate-300 font-medium block mb-1 flex items-center gap-1.5">
-                <Building className="w-3.5 h-3.5 text-cyan-400" />
+              <label className="text-xs text-slate-700 font-semibold block mb-1 flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-[#3E6E86]" />
                 Company / Organization Name
               </label>
               <input
@@ -120,13 +125,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="e.g. Acme Corp"
-                className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded px-3 py-2 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-[#F3F5F1] border border-slate-300 text-xs text-slate-900 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0E2238]"
               />
             </div>
 
             <div>
-              <label className="text-xs text-slate-300 font-medium block mb-1 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-cyan-400" />
+              <label className="text-xs text-slate-700 font-semibold block mb-1 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-[#3E6E86]" />
                 Prepared By (Lead Architect / Analyst)
               </label>
               <input
@@ -134,13 +139,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 value={preparedBy}
                 onChange={(e) => setPreparedBy(e.target.value)}
                 placeholder="e.g. Platform Engineering Team"
-                className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded px-3 py-2 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-[#F3F5F1] border border-slate-300 text-xs text-slate-900 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0E2238]"
               />
             </div>
 
             <div>
-              <label className="text-xs text-slate-300 font-medium block mb-1 flex items-center gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+              <label className="text-xs text-slate-700 font-semibold block mb-1 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-[#3E6E86]" />
                 Analyst Notes / Strategic Context
               </label>
               <textarea
@@ -148,43 +153,43 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add contextual remarks or migration caveats..."
-                className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded px-3 py-2 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-[#F3F5F1] border border-slate-300 text-xs text-slate-900 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0E2238]"
               />
             </div>
           </div>
 
           {/* Section Inclusions Checkboxes */}
-          <div className="pt-2 border-t border-slate-800 space-y-2">
-            <span className="text-xs text-slate-400 font-medium block mb-1">
+          <div className="pt-3 border-t border-slate-200 space-y-2">
+            <span className="text-xs text-slate-700 font-semibold block mb-1">
               Include Data Sections in Report:
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeQuarterly}
                   onChange={(e) => setIncludeQuarterly(e.target.checked)}
-                  className="rounded text-cyan-600 bg-slate-950 border-slate-700 focus:ring-cyan-500"
+                  className="rounded accent-[#0E2238]"
                 />
                 <span>Quarterly Trajectory</span>
               </label>
 
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includePerformance}
                   onChange={(e) => setIncludePerformance(e.target.checked)}
-                  className="rounded text-cyan-600 bg-slate-950 border-slate-700 focus:ring-cyan-500"
+                  className="rounded accent-[#0E2238]"
                 />
                 <span>Hardware Benchmarks</span>
               </label>
 
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeForecasting}
                   onChange={(e) => setIncludeForecasting(e.target.checked)}
-                  className="rounded text-cyan-600 bg-slate-950 border-slate-700 focus:ring-cyan-500"
+                  className="rounded accent-[#0E2238]"
                 />
                 <span>Multi-Year Forecasts</span>
               </label>
@@ -192,34 +197,37 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
 
           {/* Summary Preview Banner */}
-          <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 text-xs space-y-1">
-            <div className="text-slate-400">Report Key Takeaway:</div>
-            <div className="text-slate-200">
-              <strong className="text-emerald-400 font-bold">{lowest?.provider.fullName}</strong> is the most cost-effective provider at <span className="font-mono font-semibold">${lowest?.costs.totalMonthly.toLocaleString()}/mo</span> (${lowest?.costs.totalAnnual.toLocaleString()}/yr), saving up to <span className="font-mono text-emerald-400 font-bold">${lowest?.savingsVsHighest.toLocaleString()}/mo</span> vs peers.
+          <div className="p-3.5 rounded-xl bg-[#F3F5F1] border border-slate-200 text-xs space-y-1">
+            <div className="text-slate-500 font-mono uppercase tracking-wider text-[10px]">Report Key Takeaway</div>
+            <div className="text-slate-800">
+              <strong className="text-emerald-800 font-bold">{lowest?.provider.fullName}</strong> is the most cost-effective provider at <span className="font-mono font-semibold">${lowest?.costs.totalMonthly.toLocaleString()}/mo</span> (${lowest?.costs.totalAnnual.toLocaleString()}/yr), saving up to <span className="font-mono text-emerald-800 font-bold">${lowest?.savingsVsHighest.toLocaleString()}/mo</span> vs peers.
             </div>
           </div>
         </div>
 
         {/* Modal Actions Footer */}
-        <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/80 flex flex-col sm:flex-row items-center justify-end gap-3">
+        <div className="px-6 py-4 border-t border-slate-200 bg-[#F3F5F1] flex flex-col sm:flex-row items-center justify-end gap-3">
           <button
+            type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            className="w-full sm:w-auto px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           >
             Cancel
           </button>
 
           <button
+            type="button"
             onClick={handleExportExcel}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-md transition-all shadow-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#0E2238] hover:bg-[#16232F] rounded-lg transition-all cursor-pointer"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 text-[#5FD3BF]" />
             <span>Download Excel (.xlsx)</span>
           </button>
 
           <button
+            type="button"
             onClick={handleExportPdf}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 rounded-md transition-all shadow-sm"
+            className="w-full sm:w-auto xh-btn primary justify-center"
           >
             <FileText className="w-4 h-4" />
             <span>Download PDF Report</span>

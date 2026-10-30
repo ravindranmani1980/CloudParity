@@ -1,5 +1,26 @@
 export type CloudProviderId = 'aws' | 'azure' | 'gcp';
 
+export type CloudRegionId =
+  | 'us-east'
+  | 'us-west'
+  | 'eu-west'
+  | 'ap-southeast'
+  | 'ap-northeast'
+  | 'sa-east';
+
+export interface CloudRegionInfo {
+  id: CloudRegionId;
+  name: string;
+  shortName: string;
+  continent: string;
+  providerZones: Record<CloudProviderId, string>;
+  priceMultipliers: Record<CloudProviderId, number>;
+  intraAzLatencyMs: Record<CloudProviderId, number>;
+  clientEdgeRttMs: Record<CloudProviderId, number>;
+  crossRegionRttFromUsEastMs: Record<CloudProviderId, number>;
+  crossRegionReplicationPerGb: Record<CloudProviderId, number>;
+}
+
 export interface CloudProviderInfo {
   id: CloudProviderId;
   name: string;
@@ -25,7 +46,9 @@ export interface WorkloadPreset {
 }
 
 export interface WorkloadConfig {
-  region: 'us-east' | 'us-west' | 'eu-west' | 'ap-southeast';
+  region: CloudRegionId;
+  regions: CloudRegionId[];
+  multiRegionMode?: 'traffic-split' | 'active-active-replica';
   os: 'linux' | 'windows';
   commitment: 'on-demand' | '1yr-reserved' | '3yr-reserved' | 'spot';
   // Compute
@@ -59,11 +82,28 @@ export interface ServiceCostBreakdown {
   objectStorage: number;
   database: number;
   networking: number;
+  crossRegionReplication: number;
   kubernetes: number;
   gpu: number;
   support: number;
   totalMonthly: number;
   totalAnnual: number;
+}
+
+export interface RegionalProviderBreakdown {
+  regionId: CloudRegionId;
+  regionName: string;
+  shortName: string;
+  providerZone: string;
+  isSelected: boolean;
+  weightPct: number;
+  priceMultiplier: number;
+  pricePremiumPct: number;
+  allocatedMonthlyCost: number;
+  standaloneMonthlyCost: number;
+  intraAzLatencyMs: number;
+  clientEdgeRttMs: number;
+  crossRegionRttMs: number;
 }
 
 export interface ProviderComparisonResult {
@@ -79,6 +119,24 @@ export interface ProviderComparisonResult {
   savingsVsHighest: number;
   savingsPercentage: number;
   isLowestCost: boolean;
+  blendedRegionMultiplier: number;
+  avgClientRttMs: number;
+  avgIntraAzLatencyMs: number;
+  regionalBreakdown: RegionalProviderBreakdown[];
+}
+
+export interface RegionalComparisonSummaryRow {
+  region: CloudRegionInfo;
+  isSelected: boolean;
+  weightPct: number;
+  allocatedCosts: Record<CloudProviderId, number>;
+  standaloneCosts: Record<CloudProviderId, number>;
+  pricePremiumPct: Record<CloudProviderId, number>;
+  clientEdgeRttMs: Record<CloudProviderId, number>;
+  intraAzLatencyMs: Record<CloudProviderId, number>;
+  cheapestProvider: CloudProviderId;
+  fastestLatencyProvider: CloudProviderId;
+  maxRegionalSpreadMonthly: number;
 }
 
 export interface PerformanceMetric {
@@ -93,7 +151,7 @@ export interface PerformanceMetric {
 }
 
 export interface QuarterlyData {
-  quarter: string; // e.g., 'Q1 2026', 'Q2 2026'
+  quarter: string;
   aws: number;
   azure: number;
   gcp: number;
@@ -103,7 +161,7 @@ export interface QuarterlyData {
 
 export interface HistoricalPricePoint {
   year: number;
-  metric: string; // e.g. "vCPU-hour equivalent ($)", "GB SSD Storage ($/mo)"
+  metric: string;
   aws: number;
   azure: number;
   gcp: number;
@@ -126,7 +184,7 @@ export interface RealtimeTelemetry {
   projectedMonthEnd: number;
   monthlyBudget: number;
   burnRateHourly: number;
-  dailyTrend: number; // percentage change vs last day
+  dailyTrend: number;
   activeInstances: number;
   anomalies: AnomalyAlert[];
   regionDistribution: { region: string; percentage: number; cost: number }[];
@@ -137,9 +195,9 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'er
 
 export interface CloudCredentialConfig {
   provider: CloudProviderId;
-  accountId: string; // AWS Account ID, Azure Subscription ID, or GCP Project ID
-  roleArnOrKey: string; // AWS Role ARN, Azure Client Secret, GCP Service Account
-  tenantOrOrg?: string; // Azure Tenant ID or GCP Org ID
+  accountId: string;
+  roleArnOrKey: string;
+  tenantOrOrg?: string;
   region: string;
   authMethod: 'iam-role' | 'service-principal' | 'service-account' | 'api-key';
 }

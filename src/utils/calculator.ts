@@ -3,10 +3,15 @@ import {
   ProviderComparisonResult,
   QuarterlyData,
   CloudProviderId,
+  CloudRegionId,
   ServiceCostBreakdown,
+  RegionalProviderBreakdown,
+  RegionalComparisonSummaryRow,
 } from '../types/cloud';
 import {
   CLOUD_PROVIDERS,
+  CLOUD_REGIONS,
+  ALL_CLOUD_REGION_IDS,
   BASE_PRICING,
   REGION_MULTIPLIERS,
   COMMITMENT_MULTIPLIERS,
@@ -14,19 +19,27 @@ import {
 
 const HOURS_PER_MONTH = 730;
 
-export function calculateProviderCost(
+export function getActiveRegions(config: WorkloadConfig): CloudRegionId[] {
+  if (config.regions && config.regions.length > 0) {
+    return config.regions;
+  }
+  return [config.region || 'us-east'];
+}
+
+export function calculateSingleRegionProviderCost(
   providerId: CloudProviderId,
-  config: WorkloadConfig
+  config: WorkloadConfig,
+  regionId: CloudRegionId
 ): ServiceCostBreakdown {
-  const regMult = REGION_MULTIPLIERS[config.region]?.[providerId] ?? 1.0;
+  const regMult = REGION_MULTIPLIERS[regionId]?.[providerId] ?? 1.0;
   const commitMult = COMMITMENT_MULTIPLIERS[config.commitment]?.[providerId] ?? 1.0;
 
   // 1. Compute Cost
   const computeBase = BASE_PRICING.compute[providerId];
-  let vCpuRate = computeBase.vCpuHour * config.vCpu;
-  let ramRate = computeBase.ramGbHour * config.ramGb;
-  let osRate = config.os === 'windows' ? computeBase.windowsSurchargePerHour * (config.vCpu / 2) : 0;
-  
+  const vCpuRate = computeBase.vCpuHour * config.vCpu;
+  const ramRate = computeBase.ramGbHour * config.ramGb;
+  const osRate = config.os === 'windows' ? computeBase.windowsSurchargePerHour * (config.vCpu / 2) : 0;
+
   const rawComputeHourly = (vCpuRate + ramRate + osRate) * config.instanceCount;
   const computeMonthly = rawComputeHourly * HOURS_PER_MONTH * regMult * commitMult;
 
@@ -62,7 +75,7 @@ export function calculateProviderCost(
   }
 
   // 8. Infrastructure Subtotal & Enterprise Support
-  const subtotalMonthly = 
+  const subtotalMonthly =
     computeMonthly +
     blockStorageMonthly +
     objectStorageMonthly +
@@ -81,9 +94,88 @@ export function calculateProviderCost(
     objectStorage: Math.round(objectStorageMonthly * 100) / 100,
     database: Math.round(databaseMonthly * 100) / 100,
     networking: Math.round(networkingMonthly * 100) / 100,
+    crossRegionReplication: 0,
     kubernetes: Math.round(kubernetesMonthly * 100) / 100,
     gpu: Math.round(gpuMonthly * 100) / 100,
     support: Math.round(supportMonthly * 100) / 100,
+    totalMonthly: Math.round(totalMonthly * 100) / 100,
+    totalAnnual: Math.round(totalAnnual * 100) / 100,
+  };
+}
+
+export function calculateProviderCost(
+  providerId: CloudProviderId,
+  config: WorkloadConfig
+): ServiceCostBreakdown {
+  const activeRegions = getActiveRegions(config);
+  const regionCount = activeRegions.length;
+  const mode = config.multiRegionMode || 'traffic-split';
+  // In traffic-split mode, each region carries 1/N of the workload; in active-active-replica mode, each region carries 100% replica
+  const perRegionWeight = mode === 'active-active-replica' ? 1.0 : 1.0 / regionCount;
+
+  let compute = 0;
+  let blockStorage = 0;
+  let objectStorage = 0;
+  let database = 0;
+  let networking = 0;
+  let kubernetes = 0;
+  let gpu = 0;
+
+  activeRegions.forEach((regId) => {
+    const single = calculateSingleRegionProviderCost(providerId, config, regId);
+    compute += single.compute * perRegionWeight;
+    blockStorage += single.blockStorage * perRegionWeight;
+    objectStorage += single.objectStorage * perRegionWeight;
+    database += single.database * perRegionWeight;
+    networking += single.networking * perRegionWeight;
+    // Kubernetes control plane runs at least 1 cluster per active region if k8sClusterCount > 0
+    const k8sPerReg =
+      config.k8sClusterCount > 0
+        ? Math.max(
+            BASE_PRICING.kubernetesControlPlane[providerId],
+            single.kubernetes * perRegionWeight
+          )
+        : 0;
+    kubernetes += k8sPerReg;
+    gpu += single.gpu * perRegionWeight;
+  });
+
+  // Cross-region replication traffic when deployed across multiple regions
+  // Replicating database WAL + object storage deltas across (N - 1) peer regions
+  let crossRegionReplication = 0;
+  if (regionCount > 1) {
+    const syncedDataGbPerRegion =
+      config.dbStorageGb * 0.35 + config.objectStorageTb * 1024 * 0.15 + config.egressTb * 1024 * 0.1;
+    activeRegions.slice(1).forEach((regId) => {
+      const repRate = CLOUD_REGIONS[regId]?.crossRegionReplicationPerGb[providerId] ?? 0.02;
+      crossRegionReplication += syncedDataGbPerRegion * repRate;
+    });
+  }
+
+  const subtotalMonthly =
+    compute +
+    blockStorage +
+    objectStorage +
+    database +
+    networking +
+    crossRegionReplication +
+    kubernetes +
+    gpu;
+
+  const support = subtotalMonthly * BASE_PRICING.supportPercentage[providerId];
+  const totalMonthly = subtotalMonthly + support;
+  const totalAnnual = totalMonthly * 12;
+
+  return {
+    compute: Math.round(compute * 100) / 100,
+    blockStorage: Math.round(blockStorage * 100) / 100,
+    objectStorage: Math.round(objectStorage * 100) / 100,
+    database: Math.round(database * 100) / 100,
+    networking: Math.round(networking * 100) / 100,
+    crossRegionReplication: Math.round(crossRegionReplication * 100) / 100,
+    kubernetes: Math.round(kubernetes * 100) / 100,
+    gpu: Math.round(gpu * 100) / 100,
+    support: Math.round(support * 100) / 100,
     totalMonthly: Math.round(totalMonthly * 100) / 100,
     totalAnnual: Math.round(totalAnnual * 100) / 100,
   };
@@ -121,14 +213,69 @@ export function getEquivalentInstanceNames(
 export function compareAllProviders(config: WorkloadConfig): ProviderComparisonResult[] {
   const providers: CloudProviderId[] = ['aws', 'azure', 'gcp'];
   const instanceNames = getEquivalentInstanceNames(config);
+  const activeRegions = getActiveRegions(config);
+  const mode = config.multiRegionMode || 'traffic-split';
+  const perRegionWeight = mode === 'active-active-replica' ? 1.0 : 1.0 / activeRegions.length;
 
   const rawResults = providers.map((id) => {
     const costs = calculateProviderCost(id, config);
+
+    const regionalBreakdown: RegionalProviderBreakdown[] = ALL_CLOUD_REGION_IDS.map((regId) => {
+      const regInfo = CLOUD_REGIONS[regId];
+      const isSelected = activeRegions.includes(regId);
+      const standalone = calculateSingleRegionProviderCost(id, config, regId);
+      const weightPct = isSelected ? Math.round((100 / activeRegions.length) * 10) / 10 : 0;
+      const allocatedMonthlyCost = isSelected
+        ? Math.round(standalone.totalMonthly * perRegionWeight * 100) / 100
+        : 0;
+      const mult = regInfo.priceMultipliers[id];
+
+      return {
+        regionId: regId,
+        regionName: regInfo.name,
+        shortName: regInfo.shortName,
+        providerZone: regInfo.providerZones[id],
+        isSelected,
+        weightPct,
+        priceMultiplier: mult,
+        pricePremiumPct: Math.round((mult - 1) * 100),
+        allocatedMonthlyCost,
+        standaloneMonthlyCost: standalone.totalMonthly,
+        intraAzLatencyMs: regInfo.intraAzLatencyMs[id],
+        clientEdgeRttMs: regInfo.clientEdgeRttMs[id],
+        crossRegionRttMs: regInfo.crossRegionRttFromUsEastMs[id],
+      };
+    });
+
+    const selectedBreakdowns = regionalBreakdown.filter((b) => b.isSelected);
+    const blendedRegionMultiplier =
+      Math.round(
+        (selectedBreakdowns.reduce((acc, b) => acc + b.priceMultiplier, 0) /
+          selectedBreakdowns.length) *
+          1000
+      ) / 1000;
+    const avgClientRttMs =
+      Math.round(
+        (selectedBreakdowns.reduce((acc, b) => acc + b.clientEdgeRttMs, 0) /
+          selectedBreakdowns.length) *
+          10
+      ) / 10;
+    const avgIntraAzLatencyMs =
+      Math.round(
+        (selectedBreakdowns.reduce((acc, b) => acc + b.intraAzLatencyMs, 0) /
+          selectedBreakdowns.length) *
+          100
+      ) / 100;
+
     return {
       provider: CLOUD_PROVIDERS[id],
       costs,
       equivalentInstances: instanceNames[id],
       effectiveHourlyRate: Math.round((costs.totalMonthly / HOURS_PER_MONTH) * 1000) / 1000,
+      blendedRegionMultiplier,
+      avgClientRttMs,
+      avgIntraAzLatencyMs,
+      regionalBreakdown,
     };
   });
 
@@ -149,6 +296,73 @@ export function compareAllProviders(config: WorkloadConfig): ProviderComparisonR
   });
 }
 
+export function getRegionalComparisonMatrix(
+  config: WorkloadConfig
+): RegionalComparisonSummaryRow[] {
+  const activeRegions = getActiveRegions(config);
+  const mode = config.multiRegionMode || 'traffic-split';
+  const perRegionWeight = mode === 'active-active-replica' ? 1.0 : 1.0 / activeRegions.length;
+
+  return ALL_CLOUD_REGION_IDS.map((regId) => {
+    const reg = CLOUD_REGIONS[regId];
+    const isSelected = activeRegions.includes(regId);
+    const weightPct = isSelected ? Math.round((100 / activeRegions.length) * 10) / 10 : 0;
+
+    const awsSingle = calculateSingleRegionProviderCost('aws', config, regId).totalMonthly;
+    const azureSingle = calculateSingleRegionProviderCost('azure', config, regId).totalMonthly;
+    const gcpSingle = calculateSingleRegionProviderCost('gcp', config, regId).totalMonthly;
+
+    const standaloneCosts: Record<CloudProviderId, number> = {
+      aws: awsSingle,
+      azure: azureSingle,
+      gcp: gcpSingle,
+    };
+
+    const allocatedCosts: Record<CloudProviderId, number> = {
+      aws: isSelected ? Math.round(awsSingle * perRegionWeight * 100) / 100 : 0,
+      azure: isSelected ? Math.round(azureSingle * perRegionWeight * 100) / 100 : 0,
+      gcp: isSelected ? Math.round(gcpSingle * perRegionWeight * 100) / 100 : 0,
+    };
+
+    const pricePremiumPct: Record<CloudProviderId, number> = {
+      aws: Math.round((reg.priceMultipliers.aws - 1) * 100),
+      azure: Math.round((reg.priceMultipliers.azure - 1) * 100),
+      gcp: Math.round((reg.priceMultipliers.gcp - 1) * 100),
+    };
+
+    const minCost = Math.min(awsSingle, azureSingle, gcpSingle);
+    const maxCost = Math.max(awsSingle, azureSingle, gcpSingle);
+    const cheapestProvider: CloudProviderId =
+      minCost === gcpSingle ? 'gcp' : minCost === azureSingle ? 'azure' : 'aws';
+
+    const minRtt = Math.min(
+      reg.clientEdgeRttMs.aws,
+      reg.clientEdgeRttMs.azure,
+      reg.clientEdgeRttMs.gcp
+    );
+    const fastestLatencyProvider: CloudProviderId =
+      minRtt === reg.clientEdgeRttMs.gcp
+        ? 'gcp'
+        : minRtt === reg.clientEdgeRttMs.aws
+        ? 'aws'
+        : 'azure';
+
+    return {
+      region: reg,
+      isSelected,
+      weightPct,
+      allocatedCosts,
+      standaloneCosts,
+      pricePremiumPct,
+      clientEdgeRttMs: reg.clientEdgeRttMs,
+      intraAzLatencyMs: reg.intraAzLatencyMs,
+      cheapestProvider,
+      fastestLatencyProvider,
+      maxRegionalSpreadMonthly: Math.round((maxCost - minCost) * 100) / 100,
+    };
+  });
+}
+
 // Generate quarterly billing distribution for the current year
 export function getQuarterlyBillingData(config: WorkloadConfig): QuarterlyData[] {
   const results = compareAllProviders(config);
@@ -156,11 +370,6 @@ export function getQuarterlyBillingData(config: WorkloadConfig): QuarterlyData[]
   const azureBase = results.find((r) => r.provider.id === 'azure')?.costs.totalMonthly ?? 1000;
   const gcpBase = results.find((r) => r.provider.id === 'gcp')?.costs.totalMonthly ?? 1000;
 
-  // Realistic quarters factoring in seasonal workload shifts:
-  // Q1: Post-holiday baseline (3 months)
-  // Q2: Spring release & scale (+6%)
-  // Q3: Summer usage normalization (+10%)
-  // Q4: High-volume peak & end-of-year batch jobs (+22%)
   const quarters = [
     {
       quarter: 'Q1 2026',

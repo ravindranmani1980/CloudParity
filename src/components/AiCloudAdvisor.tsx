@@ -4,9 +4,6 @@ import {
   Send,
   Loader2,
   Brain,
-  CheckCircle2,
-  AlertCircle,
-  HelpCircle,
   Cpu,
   Layers,
   Zap,
@@ -26,19 +23,17 @@ export const AiCloudAdvisor: React.FC<AiCloudAdvisorProps> = ({
   const [promptInput, setPromptInput] = useState<string>('');
   const [analysisOutput, setAnalysisOutput] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const lowest = results.find((r) => r.isLowestCost);
 
   const handleGenerateAdvice = async (customPrompt?: string) => {
     setIsLoading(true);
-    setErrorMsg(null);
 
     const query = customPrompt || promptInput || 'Evaluate current workload architecture and optimize total cost of ownership across AWS, Azure, and GCP.';
 
-    const systemPrompt = `You are a Principal Cloud Enterprise Architect & FinOps Specialist.
+    const systemPrompt = `You are a Principal Cloud Enterprise Architect & FinOps Specialist for Maniq CloudParity.
 Analyze the following multi-cloud infrastructure requirements and cost models:
-- Region: ${config.region}
+- Active Regions: ${(config.regions && config.regions.length > 0 ? config.regions : [config.region]).join(', ')} (${(config.regions?.length ?? 1) > 1 ? config.multiRegionMode || 'traffic-split' : 'single-region'})
 - OS: ${config.os}
 - Commitment Term: ${config.commitment}
 - Primary Compute: ${config.instanceCount}x instances (${config.vCpu} vCPU, ${config.ramGb} GB RAM each)
@@ -70,9 +65,8 @@ Keep formatting clean, professional, and dense with concrete numbers and enginee
         '';
 
       if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
-        // Fallback to high-grade local analytical engine if API key isn't injected yet
         await new Promise((r) => setTimeout(r, 800));
-        setAnalysisOutput(generateAlgorithmicAdvisory(config, results, query));
+        setAnalysisOutput(generateAlgorithmicAdvisory(config, results));
         setIsLoading(false);
         return;
       }
@@ -86,11 +80,11 @@ Keep formatting clean, professional, and dense with concrete numbers and enginee
       if (response.text) {
         setAnalysisOutput(response.text);
       } else {
-        setAnalysisOutput(generateAlgorithmicAdvisory(config, results, query));
+        setAnalysisOutput(generateAlgorithmicAdvisory(config, results));
       }
     } catch (err: any) {
       console.warn('Gemini API call failed, falling back to local analytical engine:', err);
-      setAnalysisOutput(generateAlgorithmicAdvisory(config, results, query));
+      setAnalysisOutput(generateAlgorithmicAdvisory(config, results));
     } finally {
       setIsLoading(false);
     }
@@ -98,79 +92,134 @@ Keep formatting clean, professional, and dense with concrete numbers and enginee
 
   return (
     <div className="space-y-8">
-      {/* Header section with unboxed metadata */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-800">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
-            <span>AI Architecture Advisory</span>
-            <span aria-hidden="true">·</span>
-            <span>Gemini 3.8 Flash FinOps Engine</span>
-            <span aria-hidden="true">·</span>
-            <span>Workload & SKU Optimization</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            AI Cloud Architecture & FinOps Advisor
-          </h1>
-          <p className="mt-1 text-sm text-slate-400 max-w-3xl">
-            Leverage Gemini reasoning to analyze trade-offs, identify hidden architectural pitfalls, and discover savings opportunities tailored to your workload profile.
-          </p>
+      {/* Signature Postrix XH-Panel Executive Banner */}
+      <section className="xh-panel">
+        <div className="xh-kicker">
+          <span className="k">AI Cloud Architecture &amp; FinOps Remediation Blueprints</span>
+          <span className="tag">Gemini 3.8 Flash · SKU Optimization · Egress &amp; Silicon Advisory</span>
         </div>
 
-        <button
-          onClick={() => handleGenerateAdvice()}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-md transition-all shadow-md shadow-cyan-600/20 whitespace-nowrap shrink-0 disabled:opacity-50"
-        >
-          {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Sparkles className="w-4 h-4 text-cyan-200" />
-          )}
-          <span>Analyze Current Sizing</span>
-        </button>
-      </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-b border-[#C9D3D9]/12">
+          <div className="flex items-center gap-3.5">
+            <div className="rm-mono-mark !w-11 !h-11 !text-base" aria-hidden="true">
+              RM
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-[#EEF3F1] leading-snug m-0 font-sans">
+                AI Cloud Architecture &amp; FinOps Advisor
+                <span className="block font-mono font-normal text-xs text-[#A9B7BF] mt-0.5">
+                  Evaluate multi-cloud trade-offs, custom ARM silicon migration, and hidden architectural gotchas
+                </span>
+              </h1>
+            </div>
+          </div>
 
-      {/* Suggested Architecture Inquiries */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-slate-400">Common Architecture Scenarios:</span>
-        <button
-          onClick={() => {
-            const q = 'How can we minimize egress costs and optimize multi-region database latency?';
-            setPromptInput(q);
-            handleGenerateAdvice(q);
-          }}
-          className="px-2.5 py-1 text-xs rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white transition-colors"
-        >
-          Optimize Egress & Multi-Region DB
-        </button>
-        <button
-          onClick={() => {
-            const q = 'Should we use Spot / Preemptible VMs for worker nodes and what is the fault tolerance risk?';
-            setPromptInput(q);
-            handleGenerateAdvice(q);
-          }}
-          className="px-2.5 py-1 text-xs rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white transition-colors"
-        >
-          Spot Instances & Fault Tolerance
-        </button>
-        <button
-          onClick={() => {
-            const q = 'Evaluate migrating from x86 Intel to custom ARM silicon (AWS Graviton vs GCP Axion vs Azure Cobalt).';
-            setPromptInput(q);
-            handleGenerateAdvice(q);
-          }}
-          className="px-2.5 py-1 text-xs rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white transition-colors"
-        >
-          x86 vs Custom ARM Silicon
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => handleGenerateAdvice()}
+            disabled={isLoading}
+            className="xh-btn primary disabled:opacity-50"
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            <span>Analyze Current Sizing</span>
+          </button>
+        </div>
+
+        {/* 3 Permanent Architecture Insights inside XH-Panel */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-5">
+          <div className="xh-metric">
+            <div className="lbl">
+              <span>01 · Custom ARM Silicon</span>
+              <span className="text-[#5FD3BF]">+18–22% Perf/$</span>
+            </div>
+            <div className="num text-base font-sans font-semibold text-[#EEF3F1]">
+              Graviton4 · Axion · Cobalt
+            </div>
+            <p>
+              Transitioning stateless services from x86 to ARM yields immediate compute savings with lower thermal draw.
+            </p>
+          </div>
+
+          <div className="xh-metric">
+            <div className="lbl">
+              <span>02 · Storage Lifecycle Tiering</span>
+              <span className="text-[#EBC385]">-55% Bucket Cost</span>
+            </div>
+            <div className="num text-base font-sans font-semibold text-[#EEF3F1]">
+              {config.objectStorageTb} TB Object Policy
+            </div>
+            <p>
+              Transitioning objects older than 30 days to Cool / Nearline / Glacier Instant cuts raw storage overhead in half.
+            </p>
+          </div>
+
+          <div className="xh-metric">
+            <div className="lbl">
+              <span>03 · Egress &amp; Edge Caching</span>
+              <span className="text-[#5FD3BF]">-40% Egress Rate</span>
+            </div>
+            <div className="num text-base font-sans font-semibold text-[#EEF3F1]">
+              {config.egressTb} TB/mo Bandwidth
+            </div>
+            <p>
+              Routing outbound traffic through CloudFront, Cloud CDN, or Azure Front Door reduces per-GB egress tariffs.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Custom Prompt Input Box */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-4">
-        <label className="text-xs text-slate-300 font-semibold block flex items-center gap-1.5">
-          <Brain className="w-4 h-4 text-cyan-400" />
-          Custom Architecture Question or Workload Constraint
-        </label>
+      <section className="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span className="rm-kicker">01 / Interactive FinOps Inquiry</span>
+            <label className="text-base font-semibold text-[#0E2238] flex items-center gap-2">
+              <Brain className="w-4 h-4 text-[#3E6E86]" />
+              Custom Architecture Question or Workload Constraint
+            </label>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                const q = 'How can we minimize egress costs and optimize multi-region database latency?';
+                setPromptInput(q);
+                handleGenerateAdvice(q);
+              }}
+              className="px-2.5 py-1 text-xs rounded-md bg-[#F3F5F1] border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              Optimize Egress &amp; Multi-Region DB
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const q = 'Should we use Spot / Preemptible VMs for worker nodes and what is the fault tolerance risk?';
+                setPromptInput(q);
+                handleGenerateAdvice(q);
+              }}
+              className="px-2.5 py-1 text-xs rounded-md bg-[#F3F5F1] border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              Spot Instances &amp; Fault Tolerance
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const q = 'Evaluate migrating from x86 Intel to custom ARM silicon (AWS Graviton vs GCP Axion vs Azure Cobalt).';
+                setPromptInput(q);
+                handleGenerateAdvice(q);
+              }}
+              className="px-2.5 py-1 text-xs rounded-md bg-[#F3F5F1] border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              x86 vs Custom ARM Silicon
+            </button>
+          </div>
+        </div>
+
         <div className="flex gap-3">
           <input
             type="text"
@@ -180,81 +229,48 @@ Keep formatting clean, professional, and dense with concrete numbers and enginee
               if (e.key === 'Enter') handleGenerateAdvice();
             }}
             placeholder="e.g., We run microservices on Kubernetes with a heavy read-write PostgreSQL database and need 99.99% uptime..."
-            className="flex-1 bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded px-3 py-2.5 focus:outline-none focus:border-cyan-500"
+            className="flex-1 bg-[#F3F5F1] border border-slate-300 text-xs text-slate-900 rounded-lg px-3.5 py-2.5 focus:outline-none focus:border-[#0E2238]"
           />
           <button
+            type="button"
             onClick={() => handleGenerateAdvice()}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-500 rounded-md transition-colors disabled:opacity-50 shrink-0"
+            className="xh-btn primary disabled:opacity-50 shrink-0"
           >
             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             <span>Consult AI</span>
           </button>
         </div>
-      </div>
+      </section>
 
       {/* Analysis Output Container */}
       {analysisOutput && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-6 space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-sm font-bold text-white tracking-tight">
-                Architectural Advisory & FinOps Analysis
+        <section className="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div>
+              <span className="rm-kicker">02 / Architectural Remediation Deliverable</span>
+              <h3 className="text-lg font-semibold text-[#0E2238] flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#D79A45]" />
+                Architectural Advisory &amp; FinOps Analysis
               </h3>
             </div>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-slate-500">
               Evaluated for {lowest?.provider.fullName} vs Competitors
             </span>
           </div>
 
-          <div className="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line font-sans space-y-2">
+          <div className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line font-sans bg-[#F3F5F1]/60 p-5 rounded-xl border border-slate-200">
             {analysisOutput}
           </div>
-        </div>
+        </section>
       )}
-
-      {/* Permanent Architecture Insights Matrix */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
-        <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
-          <div className="font-bold text-white flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-cyan-400" />
-            ARM Custom Silicon Advantage
-          </div>
-          <p className="text-slate-400 leading-relaxed">
-            Transitioning eligible microservices from Intel x86 (m6i/Dsv5) to ARM (AWS Graviton4 / GCP Axion) typically yields a <strong>15–20% immediate price/performance boost</strong> with lower thermal draw and equivalent vCPU concurrency.
-          </p>
-        </div>
-
-        <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
-          <div className="font-bold text-white flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-400" />
-            Storage Tier Lifecycle Policies
-          </div>
-          <p className="text-slate-400 leading-relaxed">
-            At {config.objectStorageTb} TB of object storage, implementing automated lifecycle rules to transition objects older than 30 days to Infrequent Access / Nearline saves up to <strong>55% on raw bucket costs</strong>.
-          </p>
-        </div>
-
-        <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
-          <div className="font-bold text-white flex items-center gap-2">
-            <Zap className="w-4 h-4 text-cyan-400" />
-            Egress Bandwidth Optimization
-          </div>
-          <p className="text-slate-400 leading-relaxed">
-            For {config.egressTb} TB/month of outbound traffic, routing egress through CloudFront, Cloud CDN, or Azure Front Door drops per-GB egress rates by ~40% while shielding origins from direct DDoS volume.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
 
-// Algorithmic high-precision FinOps advisory when Gemini API key is not yet set
 function generateAlgorithmicAdvisory(
   config: WorkloadConfig,
-  results: ProviderComparisonResult[],
-  query: string
+  results: ProviderComparisonResult[]
 ): string {
   const lowest = results.find((r) => r.isLowestCost);
   const highest = results.reduce((prev, curr) =>

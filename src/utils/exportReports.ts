@@ -33,15 +33,16 @@ export function exportToExcel(
   const annualSavings = highestCost - lowestCost;
 
   const summaryData = [
-    ['CloudParity - Multi-Cloud TCO & Cost Optimization Report'],
+    ['Maniq CloudParity - Multi-Cloud TCO & Cost Optimization Report'],
     ['Generated On', dateStr],
     ['Target Organization', options.companyName || 'Enterprise Cloud Architecture Team'],
-    ['Prepared By', options.preparedBy || 'CloudParity Analytical Engine'],
+    ['Prepared By', options.preparedBy || 'Maniq CloudParity Analytical Engine'],
     [],
     ['EXECUTIVE SUMMARY'],
     ['Most Cost-Effective Provider', lowestProvider?.provider.fullName ?? 'N/A'],
     ['Annual Projected Savings', `$${annualSavings.toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
-    ['Region Evaluated', config.region.toUpperCase()],
+    ['Regions Evaluated', (config.regions && config.regions.length > 0 ? config.regions : [config.region]).map((r) => r.toUpperCase()).join(', ')],
+    ['Multi-Region Topology Mode', (config.regions?.length ?? 1) > 1 ? (config.multiRegionMode === 'active-active-replica' ? 'Active-Active Full Replica' : 'Distributed Load Split') : 'Single Region'],
     ['Operating System', config.os.toUpperCase()],
     ['Commitment Term', config.commitment.toUpperCase()],
     [],
@@ -80,6 +81,7 @@ export function exportToExcel(
     ['Object Storage (Blob/S3/GCS)', aws.costs.objectStorage, azure.costs.objectStorage, gcp.costs.objectStorage, getMinService(aws.costs.objectStorage, azure.costs.objectStorage, gcp.costs.objectStorage)],
     ['Managed Relational Database', aws.costs.database, azure.costs.database, gcp.costs.database, getMinService(aws.costs.database, azure.costs.database, gcp.costs.database)],
     ['Network Egress Bandwidth', aws.costs.networking, azure.costs.networking, gcp.costs.networking, getMinService(aws.costs.networking, azure.costs.networking, gcp.costs.networking)],
+    ['Cross-Region Data Replication', aws.costs.crossRegionReplication || 0, azure.costs.crossRegionReplication || 0, gcp.costs.crossRegionReplication || 0, getMinService(aws.costs.crossRegionReplication || 0, azure.costs.crossRegionReplication || 0, gcp.costs.crossRegionReplication || 0)],
     ['Kubernetes Control Plane', aws.costs.kubernetes, azure.costs.kubernetes, gcp.costs.kubernetes, getMinService(aws.costs.kubernetes, azure.costs.kubernetes, gcp.costs.kubernetes)],
     ['AI / GPU Accelerators', aws.costs.gpu, azure.costs.gpu, gcp.costs.gpu, getMinService(aws.costs.gpu, azure.costs.gpu, gcp.costs.gpu)],
     ['Enterprise Support Tier', aws.costs.support, azure.costs.support, gcp.costs.support, getMinService(aws.costs.support, azure.costs.support, gcp.costs.support)],
@@ -97,6 +99,44 @@ export function exportToExcel(
 
   const wsBreakdown = XLSX.utils.aoa_to_sheet(breakdownRows);
   XLSX.utils.book_append_sheet(wb, wsBreakdown, 'Cost Comparison');
+
+  // 2b. Sheet: Regional Cost & Latency
+  if (aws.regionalBreakdown && aws.regionalBreakdown.length > 0) {
+    const regRows: (string | number)[][] = [
+      [
+        'Region ID',
+        'Region Name',
+        'AWS Standalone ($/mo)',
+        'Azure Standalone ($/mo)',
+        'GCP Standalone ($/mo)',
+        'AWS Allocated ($/mo)',
+        'Azure Allocated ($/mo)',
+        'GCP Allocated ($/mo)',
+        'AWS Client RTT (ms)',
+        'Azure Client RTT (ms)',
+        'GCP Client RTT (ms)',
+      ],
+    ];
+    aws.regionalBreakdown.forEach((awsReg, idx) => {
+      const azReg = azure.regionalBreakdown?.[idx];
+      const gcpReg = gcp.regionalBreakdown?.[idx];
+      regRows.push([
+        awsReg.regionId.toUpperCase(),
+        awsReg.regionName,
+        awsReg.standaloneMonthlyCost,
+        azReg?.standaloneMonthlyCost ?? 0,
+        gcpReg?.standaloneMonthlyCost ?? 0,
+        awsReg.allocatedMonthlyCost,
+        azReg?.allocatedMonthlyCost ?? 0,
+        gcpReg?.allocatedMonthlyCost ?? 0,
+        awsReg.clientEdgeRttMs,
+        azReg?.clientEdgeRttMs ?? 0,
+        gcpReg?.clientEdgeRttMs ?? 0,
+      ]);
+    });
+    const wsRegional = XLSX.utils.aoa_to_sheet(regRows);
+    XLSX.utils.book_append_sheet(wb, wsRegional, 'Regional Cost & Latency');
+  }
 
   // 3. Sheet: Quarterly Projections
   if (options.includeQuarterly) {
@@ -135,7 +175,7 @@ export function exportToExcel(
   }
 
   // Write file
-  const filename = `CloudParity_Comparison_${options.companyName.replace(/\s+/g, '_') || 'Report'}_${dateStr}.xlsx`;
+  const filename = `Maniq_CloudParity_Comparison_${options.companyName.replace(/\s+/g, '_') || 'Report'}_${dateStr}.xlsx`;
   XLSX.writeFile(wb, filename);
 }
 
@@ -168,28 +208,28 @@ export function exportToPdf(
 
   let y = 40;
 
-  // Header Bar
-  doc.setFillColor(15, 23, 42); // slate-900
+  // Header Bar (#081420 Postrix navy-deep)
+  doc.setFillColor(8, 20, 32);
   doc.rect(0, 0, pageWidth, 75, 'F');
 
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(238, 243, 241);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
-  doc.text('CloudParity Multi-Cloud Comparative Report', 40, 36);
+  doc.text('Maniq CloudParity Multi-Cloud Comparative Report', 40, 36);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(148, 163, 184); // slate-400
+  doc.setTextColor(169, 183, 191);
   doc.text(`AWS vs Microsoft Azure vs Google Cloud Platform | Generated: ${dateStr}`, 40, 54);
 
   y = 100;
 
   // Metadata block
   doc.setFontSize(9);
-  doc.setTextColor(51, 65, 85);
+  doc.setTextColor(22, 35, 47);
   doc.text(`Organization: ${options.companyName || 'Cloud Strategy Team'}`, 40, y);
-  doc.text(`Prepared By: ${options.preparedBy || 'CloudParity Engine'}`, 240, y);
-  doc.text(`Region: ${config.region.toUpperCase()} | Commitment: ${config.commitment}`, 420, y);
+  doc.text(`Prepared By: ${options.preparedBy || 'Maniq CloudParity Engine'}`, 240, y);
+  doc.text(`Regions: ${(config.regions && config.regions.length > 0 ? config.regions : [config.region]).map((r) => r.toUpperCase()).join(', ')} | Term: ${config.commitment}`, 390, y);
   y += 20;
 
   // Executive Callout Box
@@ -354,10 +394,10 @@ export function exportToPdf(
 
   // Footer on page 1
   doc.setFontSize(7.5);
-  doc.setTextColor(148, 163, 184);
-  doc.text('Generated by CloudParity. Pricing based on 2026 public enterprise cloud tariffs and standard multi-region rate cards.', 40, 815);
+  doc.setTextColor(127, 144, 154);
+  doc.text('Generated by Maniq CloudParity (Author: Mani Ravindran — ravindran.in). Based on 2026 public enterprise cloud tariffs.', 40, 815);
   doc.text('Page 1 of 1', pageWidth - 85, 815);
 
-  const filename = `CloudParity_Report_${options.companyName.replace(/\s+/g, '_') || 'Cloud'}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const filename = `Maniq_CloudParity_Report_${options.companyName.replace(/\s+/g, '_') || 'Cloud'}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);
 }

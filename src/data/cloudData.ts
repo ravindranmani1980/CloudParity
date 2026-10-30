@@ -1,4 +1,10 @@
-import { CloudProviderInfo, PerformanceMetric, HistoricalPricePoint, WorkloadPreset } from '../types/cloud';
+import {
+  CloudProviderInfo,
+  CloudRegionId,
+  CloudRegionInfo,
+  PerformanceMetric,
+  WorkloadPreset,
+} from '../types/cloud';
 
 export const CLOUD_PROVIDERS: Record<'aws' | 'azure' | 'gcp', CloudProviderInfo> = {
   aws: {
@@ -26,59 +32,165 @@ export const CLOUD_PROVIDERS: Record<'aws' | 'azure' | 'gcp', CloudProviderInfo>
     brandColor: '#4285F4',
     logoBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     badgeBorder: 'border-blue-500/30 text-blue-300',
-    defaultRegion: 'us-central1 (Iowa)',
+    defaultRegion: 'us-central1 / us-east4',
   },
 };
 
+export const CLOUD_REGIONS: Record<CloudRegionId, CloudRegionInfo> = {
+  'us-east': {
+    id: 'us-east',
+    name: 'US East (N. Virginia / Iowa)',
+    shortName: 'US East',
+    continent: 'North America',
+    providerZones: {
+      aws: 'us-east-1 (N. Virginia)',
+      azure: 'East US (Virginia)',
+      gcp: 'us-east4 (N. Virginia) / us-central1',
+    },
+    priceMultipliers: { aws: 1.0, azure: 1.0, gcp: 1.0 },
+    intraAzLatencyMs: { aws: 0.62, azure: 0.71, gcp: 0.54 },
+    clientEdgeRttMs: { aws: 12.4, azure: 13.1, gcp: 11.2 },
+    crossRegionRttFromUsEastMs: { aws: 0.6, azure: 0.7, gcp: 0.5 },
+    crossRegionReplicationPerGb: { aws: 0.02, azure: 0.02, gcp: 0.02 },
+  },
+  'us-west': {
+    id: 'us-west',
+    name: 'US West (Oregon / Washington)',
+    shortName: 'US West',
+    continent: 'North America',
+    providerZones: {
+      aws: 'us-west-2 (Oregon)',
+      azure: 'West US 2 (Washington)',
+      gcp: 'us-west1 (Oregon)',
+    },
+    priceMultipliers: { aws: 1.04, azure: 1.03, gcp: 1.02 },
+    intraAzLatencyMs: { aws: 0.65, azure: 0.74, gcp: 0.56 },
+    clientEdgeRttMs: { aws: 14.8, azure: 15.2, gcp: 13.5 },
+    crossRegionRttFromUsEastMs: { aws: 62.0, azure: 64.5, gcp: 58.2 },
+    crossRegionReplicationPerGb: { aws: 0.02, azure: 0.02, gcp: 0.02 },
+  },
+  'eu-west': {
+    id: 'eu-west',
+    name: 'Europe West (Frankfurt / Ireland)',
+    shortName: 'EU West',
+    continent: 'Europe',
+    providerZones: {
+      aws: 'eu-central-1 (Frankfurt)',
+      azure: 'West Europe (Netherlands)',
+      gcp: 'europe-west3 (Frankfurt)',
+    },
+    priceMultipliers: { aws: 1.09, azure: 1.10, gcp: 1.07 },
+    intraAzLatencyMs: { aws: 0.68, azure: 0.76, gcp: 0.58 },
+    clientEdgeRttMs: { aws: 15.6, azure: 16.0, gcp: 14.1 },
+    crossRegionRttFromUsEastMs: { aws: 84.5, azure: 86.2, gcp: 79.4 },
+    crossRegionReplicationPerGb: { aws: 0.02, azure: 0.02, gcp: 0.02 },
+  },
+  'ap-southeast': {
+    id: 'ap-southeast',
+    name: 'Asia Pacific SE (Singapore)',
+    shortName: 'AP Singapore',
+    continent: 'Asia Pacific',
+    providerZones: {
+      aws: 'ap-southeast-1 (Singapore)',
+      azure: 'Southeast Asia (Singapore)',
+      gcp: 'asia-southeast1 (Singapore)',
+    },
+    priceMultipliers: { aws: 1.15, azure: 1.14, gcp: 1.12 },
+    intraAzLatencyMs: { aws: 0.74, azure: 0.82, gcp: 0.64 },
+    clientEdgeRttMs: { aws: 18.2, azure: 19.1, gcp: 16.8 },
+    crossRegionRttFromUsEastMs: { aws: 218.0, azure: 224.0, gcp: 206.5 },
+    crossRegionReplicationPerGb: { aws: 0.02, azure: 0.02, gcp: 0.02 },
+  },
+  'ap-northeast': {
+    id: 'ap-northeast',
+    name: 'Asia Pacific NE (Tokyo / Osaka)',
+    shortName: 'AP Tokyo',
+    continent: 'Asia Pacific',
+    providerZones: {
+      aws: 'ap-northeast-1 (Tokyo)',
+      azure: 'Japan East (Tokyo)',
+      gcp: 'asia-northeast1 (Tokyo)',
+    },
+    priceMultipliers: { aws: 1.18, azure: 1.17, gcp: 1.15 },
+    intraAzLatencyMs: { aws: 0.71, azure: 0.79, gcp: 0.61 },
+    clientEdgeRttMs: { aws: 16.4, azure: 17.2, gcp: 15.0 },
+    crossRegionRttFromUsEastMs: { aws: 154.0, azure: 158.0, gcp: 146.0 },
+    crossRegionReplicationPerGb: { aws: 0.02, azure: 0.02, gcp: 0.02 },
+  },
+  'sa-east': {
+    id: 'sa-east',
+    name: 'South America East (São Paulo)',
+    shortName: 'SA São Paulo',
+    continent: 'South America',
+    providerZones: {
+      aws: 'sa-east-1 (São Paulo)',
+      azure: 'Brazil South (São Paulo)',
+      gcp: 'southamerica-east1 (São Paulo)',
+    },
+    priceMultipliers: { aws: 1.32, azure: 1.29, gcp: 1.26 },
+    intraAzLatencyMs: { aws: 0.88, azure: 0.94, gcp: 0.76 },
+    clientEdgeRttMs: { aws: 24.5, azure: 25.8, gcp: 22.1 },
+    crossRegionRttFromUsEastMs: { aws: 118.0, azure: 122.5, gcp: 112.0 },
+    crossRegionReplicationPerGb: { aws: 0.025, azure: 0.025, gcp: 0.022 },
+  },
+};
+
+export const ALL_CLOUD_REGION_IDS: CloudRegionId[] = [
+  'us-east',
+  'us-west',
+  'eu-west',
+  'ap-southeast',
+  'ap-northeast',
+  'sa-east',
+];
+
 // Regional pricing multipliers relative to US East baseline
-export const REGION_MULTIPLIERS: Record<string, Record<'aws' | 'azure' | 'gcp', number>> = {
-  'us-east': { aws: 1.0, azure: 1.0, gcp: 1.0 },
-  'us-west': { aws: 1.04, azure: 1.03, gcp: 1.02 },
-  'eu-west': { aws: 1.08, azure: 1.09, gcp: 1.07 },
-  'ap-southeast': { aws: 1.15, azure: 1.14, gcp: 1.12 },
+export const REGION_MULTIPLIERS: Record<CloudRegionId, Record<'aws' | 'azure' | 'gcp', number>> = {
+  'us-east': CLOUD_REGIONS['us-east'].priceMultipliers,
+  'us-west': CLOUD_REGIONS['us-west'].priceMultipliers,
+  'eu-west': CLOUD_REGIONS['eu-west'].priceMultipliers,
+  'ap-southeast': CLOUD_REGIONS['ap-southeast'].priceMultipliers,
+  'ap-northeast': CLOUD_REGIONS['ap-northeast'].priceMultipliers,
+  'sa-east': CLOUD_REGIONS['sa-east'].priceMultipliers,
 };
 
 // Commitment discounts multiplier (percentage of on-demand cost)
 export const COMMITMENT_MULTIPLIERS = {
   'on-demand': { aws: 1.0, azure: 1.0, gcp: 1.0 },
-  '1yr-reserved': { aws: 0.65, azure: 0.62, gcp: 0.63 }, // ~35-38% discount
-  '3yr-reserved': { aws: 0.42, azure: 0.40, gcp: 0.41 }, // ~58-60% discount
-  'spot': { aws: 0.28, azure: 0.26, gcp: 0.25 }, // ~72-75% discount
+  '1yr-reserved': { aws: 0.65, azure: 0.62, gcp: 0.63 },
+  '3yr-reserved': { aws: 0.42, azure: 0.40, gcp: 0.41 },
+  'spot': { aws: 0.28, azure: 0.26, gcp: 0.25 },
 };
 
 // Base unit rates per hour or per GB/TB in US East (Baseline 2026 enterprise standard pricing)
 export const BASE_PRICING = {
-  // Compute rates: per vCPU-hour, per GB RAM-hour
   compute: {
     aws: {
-      vCpuHour: 0.0345, // roughly m6i baseline (~$0.096/hr for 2vCPU 8GB)
+      vCpuHour: 0.0345,
       ramGbHour: 0.0046,
       windowsSurchargePerHour: 0.046,
     },
     azure: {
-      vCpuHour: 0.0332, // roughly Dsv5 baseline
+      vCpuHour: 0.0332,
       ramGbHour: 0.0044,
       windowsSurchargePerHour: 0.044,
     },
     gcp: {
-      vCpuHour: 0.0316, // roughly N2 standard / E2 standard baseline
+      vCpuHour: 0.0316,
       ramGbHour: 0.0042,
       windowsSurchargePerHour: 0.042,
     },
   },
-  // Block Storage: $/GB/month
   blockStorage: {
-    'standard-ssd': { aws: 0.08, azure: 0.076, gcp: 0.08 }, // gp3, Standard SSD, pd-balanced
-    'provisioned-iops': { aws: 0.125, azure: 0.13, gcp: 0.12 }, // io2, Premium SSD v2, pd-ssd
-    'extreme-iops': { aws: 0.24, azure: 0.26, gcp: 0.22 }, // io2 Block Express, Ultra Disk, pd-extreme
+    'standard-ssd': { aws: 0.08, azure: 0.076, gcp: 0.08 },
+    'provisioned-iops': { aws: 0.125, azure: 0.13, gcp: 0.12 },
+    'extreme-iops': { aws: 0.24, azure: 0.26, gcp: 0.22 },
   },
-  // Object Storage: $/TB/month
   objectStorage: {
-    hot: { aws: 23.0, azure: 20.8, gcp: 20.0 }, // S3 Standard, Blob Hot, Cloud Storage Standard
-    cool: { aws: 12.5, azure: 10.0, gcp: 10.0 }, // S3 Infrequent, Blob Cool, Cloud Storage Nearline
-    archive: { aws: 4.0, azure: 2.0, gcp: 2.5 }, // Glacier Instant, Blob Archive, Cloud Storage Archive
+    hot: { aws: 23.0, azure: 20.8, gcp: 20.0 },
+    cool: { aws: 12.5, azure: 10.0, gcp: 10.0 },
+    archive: { aws: 4.0, azure: 2.0, gcp: 2.5 },
   },
-  // Managed Relational Database: multiplier on raw compute + DB license & storage
   database: {
     engineMultiplier: {
       postgres: 1.35,
@@ -88,30 +200,26 @@ export const BASE_PRICING = {
     storagePerGb: { aws: 0.115, azure: 0.115, gcp: 0.11 },
     multiAzMultiplier: 1.95,
   },
-  // Networking Egress: $/TB (blended average above initial free tier)
   networkingEgress: {
-    aws: 88.0, // ~$0.088/GB for first 40TB
-    azure: 85.0, // ~$0.085/GB
-    gcp: 82.0, // ~$0.082/GB Premium tier
+    aws: 88.0,
+    azure: 85.0,
+    gcp: 82.0,
   },
-  // Kubernetes Control Plane: $/month
   kubernetesControlPlane: {
-    aws: 73.0, // EKS $0.10/hr = ~$73/mo per cluster
-    azure: 0.0, // AKS Free tier cluster management (standard SLA optional $73)
-    gcp: 73.0, // GKE $0.10/hr per cluster beyond free 1st cluster credit
+    aws: 73.0,
+    azure: 0.0,
+    gcp: 73.0,
   },
-  // GPU Accelerators ($/GPU-hour)
   gpuHourly: {
     t4: { aws: 0.526, azure: 0.51, gcp: 0.45 },
     l4: { aws: 0.85, azure: 0.82, gcp: 0.70 },
     a100: { aws: 3.67, azure: 3.40, gcp: 3.25 },
     h100: { aws: 6.95, azure: 7.10, gcp: 6.20 },
   },
-  // Enterprise Support Tier: % of total monthly infrastructure spend
   supportPercentage: {
-    aws: 0.07, // 7% business support
-    azure: 0.06, // 6% standard/professional direct
-    gcp: 0.065, // 6.5% enhanced support
+    aws: 0.07,
+    azure: 0.06,
+    gcp: 0.065,
   },
 };
 
@@ -120,9 +228,11 @@ export const WORKLOAD_PRESETS: WorkloadPreset[] = [
   {
     id: 'saas-microservices',
     name: 'SaaS Microservices Web Scale',
-    description: 'High-availability containerized microservices with managed Postgres, Redis, and high egress.',
+    description: 'High-availability containerized microservices across US East & EU West with managed Postgres and high egress.',
     specs: {
       region: 'us-east',
+      regions: ['us-east', 'eu-west'],
+      multiRegionMode: 'traffic-split',
       os: 'linux',
       commitment: '1yr-reserved',
       vCpu: 64,
@@ -138,7 +248,7 @@ export const WORKLOAD_PRESETS: WorkloadPreset[] = [
       dbStorageGb: 800,
       dbMultiAz: true,
       egressTb: 25,
-      k8sClusterCount: 1,
+      k8sClusterCount: 2,
       k8sNodeCount: 8,
       gpuType: 'none',
       gpuCount: 0,
@@ -147,9 +257,11 @@ export const WORKLOAD_PRESETS: WorkloadPreset[] = [
   {
     id: 'data-ai-workload',
     name: 'AI Inference & Data Pipeline',
-    description: 'GPU-accelerated vector search, model fine-tuning, and large petabyte-scale lakehouse.',
+    description: 'GPU-accelerated vector search, model fine-tuning, and large petabyte-scale lakehouse across US East & US West.',
     specs: {
       region: 'us-east',
+      regions: ['us-east', 'us-west'],
+      multiRegionMode: 'traffic-split',
       os: 'linux',
       commitment: '1yr-reserved',
       vCpu: 96,
@@ -174,9 +286,11 @@ export const WORKLOAD_PRESETS: WorkloadPreset[] = [
   {
     id: 'enterprise-db',
     name: 'Enterprise ERP & High-Throughput DB',
-    description: 'Mission-critical database tier with Windows Server support, multi-region replication, and ultra disks.',
+    description: 'Mission-critical database tier with Windows Server support, multi-region replication across 3 continents, and ultra disks.',
     specs: {
       region: 'us-east',
+      regions: ['us-east', 'eu-west', 'ap-southeast'],
+      multiRegionMode: 'active-active-replica',
       os: 'windows',
       commitment: '3yr-reserved',
       vCpu: 128,
@@ -201,9 +315,11 @@ export const WORKLOAD_PRESETS: WorkloadPreset[] = [
   {
     id: 'startup-web',
     name: 'Startup MVP / API Backend',
-    description: 'Lean web application tier with modest database and container cluster optimized for low burn rate.',
+    description: 'Lean single-region web application tier with modest database and container cluster optimized for low burn rate.',
     specs: {
       region: 'us-east',
+      regions: ['us-east'],
+      multiRegionMode: 'traffic-split',
       os: 'linux',
       commitment: 'on-demand',
       vCpu: 16,

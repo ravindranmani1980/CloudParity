@@ -68,10 +68,10 @@ export default function App() {
       />
 
       {/* Secondary Context Bar matching Postrix aesthetic */}
-      <div className="bg-[#0D1C2D] text-[#EEF3F1] border-b border-[#3E6E86]/35 px-6 py-2.5">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 font-mono text-[#EEF3F1]">
+      <div className="bg-[#0D1C2D] text-[#EEF3F1] border-b border-[#3E6E86]/35 px-4 sm:px-6 py-2.5">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2.5 md:gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-1.5 font-mono text-[#EEF3F1]">
               <Server className="w-3.5 h-3.5 text-[#5FD3BF] shrink-0" />
               <span className="font-sans text-[#A9B7BF]">Active Profile:</span>
               <strong className="font-semibold text-white">{currentPresetLabel}</strong>
@@ -79,7 +79,7 @@ export default function App() {
                 ({lowest?.provider.name} Optimal · ${lowest?.costs.totalMonthly.toLocaleString()}/mo)
               </span>
             </div>
-            <span className="text-[#3E6E86]">·</span>
+            <span className="text-[#3E6E86] hidden sm:inline">·</span>
             <div className="text-[#C6D1D6]">
               <span className="text-[#A9B7BF]">Regions ({config.regions?.length || 1}):</span>{' '}
               <strong className="font-mono font-medium text-white uppercase">
@@ -97,13 +97,13 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[#A9B7BF]">Switch Architecture Preset:</span>
+          <div className="flex items-center justify-between sm:justify-start gap-2 pt-1 md:pt-0 border-t border-[#3E6E86]/20 md:border-t-0">
+            <span className="text-[#A9B7BF] whitespace-nowrap">Switch Preset:</span>
             <select
               aria-label="Switch Architecture Preset"
               value={activePreset}
               onChange={(e) => handleSelectPreset(e.target.value as WorkloadPresetId)}
-              className="bg-[#102236] border border-[#3E6E86]/50 text-[#EEF3F1] text-xs rounded px-2.5 py-1 font-medium focus:outline-none focus:border-[#5FD3BF]"
+              className="flex-1 sm:flex-initial bg-[#102236] border border-[#3E6E86]/50 text-[#EEF3F1] text-xs rounded px-2.5 py-1 font-medium focus:outline-none focus:border-[#5FD3BF]"
             >
               {WORKLOAD_PRESETS.map((p) => (
                 <option key={p.id} value={p.id}>

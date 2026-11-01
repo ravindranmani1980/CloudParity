@@ -55,8 +55,8 @@ const NAV_ITEMS: { id: ActiveTab; label: string; shortLabel: string; subtitle: s
   },
   {
     id: 'advisor',
-    label: 'AI Advisor',
-    shortLabel: 'AI Advisor',
+    label: 'FinOps Advisor',
+    shortLabel: 'FinOps',
     subtitle: 'Architectural & FinOps optimization',
   },
 ];

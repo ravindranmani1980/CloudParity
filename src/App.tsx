@@ -7,7 +7,7 @@ import { PerformanceAnalytics } from './components/PerformanceAnalytics';
 import { PricingForecasts } from './components/PricingForecasts';
 import { QuarterlyHistorical } from './components/QuarterlyHistorical';
 import { RealTimeMonitoring } from './components/RealTimeMonitoring';
-import { AiCloudAdvisor } from './components/AiCloudAdvisor';
+import { FinOpsRecommendations } from './components/FinOpsRecommendations';
 import { ExportModal } from './components/ExportModal';
 import {
   WorkloadConfig,
@@ -162,7 +162,7 @@ export default function App() {
         )}
 
         {activeTab === 'advisor' && (
-          <AiCloudAdvisor
+          <FinOpsRecommendations
             config={config}
             results={results}
           />

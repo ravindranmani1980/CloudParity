@@ -8,7 +8,7 @@ export type ActiveTab =
   | 'forecasts'
   | 'quarterly'
   | 'monitoring'
-  | 'advisor';
+  | 'finops';
 
 interface TopNavProps {
   activeTab: ActiveTab;
@@ -54,8 +54,8 @@ const NAV_ITEMS: { id: ActiveTab; label: string; shortLabel: string; subtitle: s
     subtitle: 'Real-time burn rate & D3 spike overages',
   },
   {
-    id: 'advisor',
-    label: 'FinOps Advisor',
+    id: 'finops',
+    label: 'FinOps Recommendations',
     shortLabel: 'FinOps',
     subtitle: 'Architectural & FinOps optimization',
   },

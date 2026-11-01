@@ -34,7 +34,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   benchmarks,
 }) => {
   const [companyName, setCompanyName] = useState<string>('Acme Global Enterprises');
-  const [preparedBy, setPreparedBy] = useState<string>('Mani Ravindran — Cloud Architecture Lead');
+  const [preparedBy, setPreparedBy] = useState<string>('Ravindran Mani — Cloud Architecture Lead');
   const [notes, setNotes] = useState<string>(
     'Evaluated based on production high-availability baseline with multi-AZ relational databases, premium storage IOPS, and 1-year reserved commitment terms.'
   );

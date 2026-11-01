@@ -3,12 +3,12 @@ import { LiveAssessmentScanResult, CloudProviderId, CloudCredentialConfig } from
 export const IAM_POLICY_TEMPLATES: Record<CloudProviderId, { title: string; filename: string; policyJson: string }> = {
   aws: {
     title: 'AWS FinOps Read-Only Cross-Account Policy',
-    filename: 'aws-cloudparity-readonly-policy.json',
+    filename: 'aws-compare-readonly-policy.json',
     policyJson: `{
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "CloudParityDiscoveryPermissions",
+      "Sid": "CompareDiscoveryPermissions",
       "Effect": "Allow",
       "Action": [
         "ec2:DescribeInstances",
@@ -27,9 +27,9 @@ export const IAM_POLICY_TEMPLATES: Record<CloudProviderId, { title: string; file
   },
   azure: {
     title: 'Azure Role-Based Access Control (RBAC) Reader Role',
-    filename: 'azure-cloudparity-rbac.json',
+    filename: 'azure-compare-rbac.json',
     policyJson: `{
-  "Name": "CloudParity FinOps Reader",
+  "Name": "Compare FinOps Reader",
   "IsCustom": true,
   "Description": "Read-only access to compute metrics and billing consumption",
   "Actions": [
@@ -45,8 +45,8 @@ export const IAM_POLICY_TEMPLATES: Record<CloudProviderId, { title: string; file
   },
   gcp: {
     title: 'GCP Custom FinOps Auditor IAM Role',
-    filename: 'gcp-cloudparity-role.yaml',
-    policyJson: `title: "CloudParity Read-Only Auditor"
+    filename: 'gcp-compare-role.yaml',
+    policyJson: `title: "Compare Read-Only Auditor"
 description: "Grants read-only access to compute inventory and billing exports"
 stage: "GA"
 includedPermissions:

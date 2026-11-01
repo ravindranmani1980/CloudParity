@@ -44,7 +44,7 @@ export const LiveAssessment: React.FC<LiveAssessmentProps> = ({
   const [credentialForm, setCredentialForm] = useState<CloudCredentialConfig>({
     provider: 'aws',
     accountId: '849201948212',
-    roleArnOrKey: 'arn:aws:iam::849201948212:role/CloudParity-ReadOnlyAssessment',
+    roleArnOrKey: 'arn:aws:iam::849201948212:role/Compare-ReadOnlyAssessment',
     region: 'us-east-1',
     authMethod: 'iam-role',
   });
@@ -83,7 +83,7 @@ export const LiveAssessment: React.FC<LiveAssessmentProps> = ({
       ...prev,
       provider: pId,
       accountId: pId === 'aws' ? '849201948212' : pId === 'azure' ? 'sub-09a8f21e-contoso' : 'gcp-prod-infra-8421',
-      roleArnOrKey: pId === 'aws' ? 'arn:aws:iam::849201948212:role/CloudParity-ReadOnly' : 'sp-client-secret-key-prod',
+      roleArnOrKey: pId === 'aws' ? 'arn:aws:iam::849201948212:role/Compare-ReadOnly' : 'sp-client-secret-key-prod',
       region: pId === 'aws' ? 'us-east-1' : pId === 'azure' ? 'eastus' : 'us-central1',
     }));
     handleRunScan(pId);
@@ -470,7 +470,7 @@ export const LiveAssessment: React.FC<LiveAssessmentProps> = ({
               Enterprise FinOps Security &amp; Least Privilege Guarantee
             </h4>
             <p className="text-slate-600">
-              Maniq CloudParity operates exclusively with read-only permissions (<code>DescribeInstances</code>, <code>GetMetricData</code>, <code>ce:GetCostAndUsage</code>). No modification permissions, access to data volumes, or root keys are ever requested.
+              Maniq | Compare operates exclusively with read-only permissions (<code>DescribeInstances</code>, <code>GetMetricData</code>, <code>ce:GetCostAndUsage</code>). No modification permissions, access to data volumes, or root keys are ever requested.
             </p>
           </div>
         </div>

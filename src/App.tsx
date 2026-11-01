@@ -161,7 +161,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'advisor' && (
+        {activeTab === 'finops' && (
           <FinOpsRecommendations
             config={config}
             results={results}
@@ -169,7 +169,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Postrix-styled Footer with RM mark and Maniq CloudParity branding */}
+      {/* Postrix-styled Footer with RM mark and Maniq | Compare branding */}
       <footer className="bg-[#081420] text-[#B9C4CC] border-t border-[#3E6E86]/35 px-6 py-6 mt-auto">
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5">

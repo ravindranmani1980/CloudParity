@@ -31,7 +31,7 @@ export const AiCloudAdvisor: React.FC<AiCloudAdvisorProps> = ({
 
     const query = customPrompt || promptInput || 'Evaluate current workload architecture and optimize total cost of ownership across AWS, Azure, and GCP.';
 
-    const systemPrompt = `You are a Principal Cloud Enterprise Architect & FinOps Specialist for Maniq CloudParity.
+    const systemPrompt = `You are a Principal Cloud Enterprise Architect & FinOps Specialist for Maniq | Compare.
 Analyze the following multi-cloud infrastructure requirements and cost models:
 - Active Regions: ${(config.regions && config.regions.length > 0 ? config.regions : [config.region]).join(', ')} (${(config.regions?.length ?? 1) > 1 ? config.multiRegionMode || 'traffic-split' : 'single-region'})
 - OS: ${config.os}

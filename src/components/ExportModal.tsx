@@ -88,7 +88,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </span>
             <div>
               <h3 className="text-base font-semibold text-[#0E2238]">
-                Export Maniq CloudParity Executive Report
+                Export Maniq | Compare Executive Report
               </h3>
               <p className="text-xs text-slate-600">
                 Generate boardroom-ready executive PDF and audit-ready Excel spreadsheets.

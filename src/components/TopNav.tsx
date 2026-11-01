@@ -47,7 +47,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             RM
           </span>
           <span>
-            Maniq <span className="accent">CloudParity</span>
+            Maniq <span className="text-[#A9B7BF] font-light mx-0.5">|</span> <span className="accent">Compare</span>
           </span>
         </a>
 

@@ -178,7 +178,7 @@ export default function App() {
             </span>
             <span>
               <strong className="font-serif text-sm font-semibold text-[#F3F5F1]">
-                Maniq <span className="text-[#D79A45]">CloudParity</span>
+                Maniq <span className="text-[#A9B7BF] font-light mx-0.5">|</span> <span className="text-[#D79A45]">Compare</span>
               </strong>{' '}
               — Multi-Cloud Cost, Performance &amp; FinOps Parity Platform
             </span>
